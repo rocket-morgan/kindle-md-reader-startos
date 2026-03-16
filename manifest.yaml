@@ -1,0 +1,60 @@
+id: kindle-md-reader
+version: 0.1.0
+release-notes: "Initial wrapper"
+title: Kindle Markdown Reader
+description: Servidor ligero para leer Markdown desde un vault en StartOS (UI minimal para Kindle).
+license: MIT
+wraps: {}  # standalone
+
+assets:
+  icon: icon.png
+  license: LICENSE
+  instructions: instructions.md
+
+dependencies: { }
+
+interfaces:
+  main:
+    name: Web UI
+    description: Kindle Markdown Reader
+    protocol: http
+    port: 3000
+    ui: true
+
+volumes:
+  data:
+    type: data
+    description: Vault Markdown
+
+mounts:
+  data:
+    volume: data
+    path: /vault
+
+config: { }
+
+env:
+  - name: AUTH_USER
+    description: Usuario para login
+    default: kindle
+  - name: AUTH_PASS
+    description: Contraseña para login
+    default: changeme
+  - name: SESSION_SECRET
+    description: Clave de sesión
+    default: replace-me
+  - name: VAULT_PATH
+    description: Ruta del vault dentro del contenedor
+    default: /vault
+  - name: PORT
+    description: Puerto HTTP interno
+    default: "3000"
+
+health-checks:
+  main:
+    name: Web check
+    type: http
+    path: /health
+    interval: 30s
+    timeout: 10s
+    initial-delay: 5s
