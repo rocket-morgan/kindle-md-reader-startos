@@ -152,6 +152,10 @@ app.get('/logout', (req, res) => {
   res.redirect('/login');
 });
 
+app.get('/health', (_req, res) => {
+  res.type('text/plain').send('ok');
+});
+
 app.get('/browse/*', authMw, (req, res) => {
   const rel = decodeURIComponent(req.params[0] || '').replace(/^\/+/, '').replace(/\.\./g, '');
   const full = path.join(VAULT_PATH, rel);

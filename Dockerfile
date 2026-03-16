@@ -4,6 +4,8 @@ RUN apt-get update && apt-get install -y jq && npm install -g yq && rm -rf /var/
 COPY app/package*.json ./
 RUN npm ci --omit=dev
 COPY app/. ./
+COPY docker_entrypoint.sh /app/docker_entrypoint.sh
+RUN chmod +x /app/docker_entrypoint.sh
 ENV PORT=3000
 ENV VAULT_PATH=/vault
 ENV AUTH_USER=kindle

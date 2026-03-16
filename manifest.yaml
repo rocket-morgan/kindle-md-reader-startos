@@ -1,9 +1,18 @@
 id: kindle-md-reader
-version: 0.1.0
-release-notes: "Initial wrapper"
+version: 0.1.1
+release-notes: "Fix missing docker_entrypoint.sh in container image"
 title: Kindle Markdown Reader
-description: Servidor ligero para leer Markdown desde un vault en StartOS (UI minimal para Kindle).
+description:
+  short: "Lector ligero de Markdown para vaults en StartOS."
+  long: |
+    Kindle Markdown Reader expone una interfaz web minimalista para leer
+    archivos Markdown almacenados en un vault montado por StartOS.
+
+    El servicio está pensado para usar el volumen `data` en `/vault` y
+    navegar documentos `.md` desde un navegador simple como el del Kindle.
 license: MIT
+wrapper-repo: "https://github.com/rocket-morgan/kindle-md-reader-startos"
+upstream-repo: "https://github.com/rocket-morgan/kindle-md-reader"
 wraps: {}  # standalone
 
 assets:
@@ -11,48 +20,83 @@ assets:
   license: LICENSE
   instructions: instructions.md
 
-dependencies: { }
+main:
+  type: docker
+  image: main
+  entrypoint: docker_entrypoint.sh
+  args: []
+  mounts:
+    data: /vault
+  gpu-acceleration: false
+
+hardware-requirements:
+  arch:
+    - x86_64
+    - aarch64
+
+dependencies: {}
 
 interfaces:
   main:
     name: Web UI
     description: Kindle Markdown Reader
-    protocol: http
-    port: 3000
+    tor-config:
+      port-mapping:
+        80: "3000"
+    lan-config:
+      443:
+        ssl: true
+        internal: 3000
     ui: true
+    protocols:
+      - tcp
+      - http
 
 volumes:
   data:
     type: data
-    description: Vault Markdown
 
-mounts:
-  data:
-    volume: data
-    path: /vault
+config:
+  get:
+    type: script
+  set:
+    type: script
 
-config: 
-  type: object
-  required: [authUser, authPass, vaultPath]
-  properties:
-    authUser:
-      type: string
-      title: Usuario
-      default: kindle
-    authPass:
-      type: string
-      title: Contraseña
-      default: changeme
-      writeOnly: true
-    vaultPath:
-      type: string
-      title: Ruta del vault
-      default: /vault
+properties:
+  type: script
+
 health-checks:
   main:
     name: Web check
-    type: http
-    path: /health
-    interval: 30s
-    timeout: 10s
-    initial-delay: 5s
+    success-message: Kindle Markdown Reader is accessible
+    type: script
+
+backup:
+  create:
+    type: docker
+    image: compat
+    system: true
+    entrypoint: compat
+    args:
+      - duplicity
+      - create
+      - /mnt/backup
+      - /vault
+    mounts:
+      BACKUP: /mnt/backup
+      data: /vault
+    io-format: yaml
+  restore:
+    type: docker
+    image: compat
+    system: true
+    entrypoint: compat
+    args:
+      - duplicity
+      - restore
+      - /mnt/backup
+      - /vault
+    mounts:
+      BACKUP: /mnt/backup
+      data: /vault
+    io-format: yaml

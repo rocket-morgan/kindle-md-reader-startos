@@ -4,3 +4,4 @@ node_modules
 image.tar
 *.s9pk
 npm-debug.log*
+docker-images/
