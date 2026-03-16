@@ -31,25 +31,23 @@ mounts:
     volume: data
     path: /vault
 
-config: { }
-
-env:
-  - name: AUTH_USER
-    description: Usuario para login
-    default: kindle
-  - name: AUTH_PASS
-    description: Contraseña para login
-    default: changeme
-  - name: SESSION_SECRET
-    description: Clave de sesión
-    default: replace-me
-  - name: VAULT_PATH
-    description: Ruta del vault dentro del contenedor
-    default: /vault
-  - name: PORT
-    description: Puerto HTTP interno
-    default: "3000"
-
+config: 
+  type: object
+  required: [authUser, authPass, vaultPath]
+  properties:
+    authUser:
+      type: string
+      title: Usuario
+      default: kindle
+    authPass:
+      type: string
+      title: Contraseña
+      default: changeme
+      writeOnly: true
+    vaultPath:
+      type: string
+      title: Ruta del vault
+      default: /vault
 health-checks:
   main:
     name: Web check
